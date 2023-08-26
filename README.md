@@ -55,8 +55,10 @@ In home asssitant:
 - Click Manage for the CameraMicStatus 
 - Click copy icon next to the URL (you'll need this in the next steps)
 <img src="./Images/WebHook.png"/>
+
 - Run WebCamMicMonitor and you will be presented with the settings screen:
 <img src="./Images/Settings.png"/>
+
 - Paste the URL copied in previous step into the Post URL.
 - Set your preference for auto start and minimized
 - click OK
