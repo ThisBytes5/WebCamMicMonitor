@@ -86,11 +86,11 @@ namespace RegistryMonitorDemo
           }
         }
       }
-
+    
       LogManager.Log($"Camera = {cameraOn}");
       LogManager.Log($"Mic = {micOn}");
 
-      Settings.PostUrl.PostJsonAsync(new { mic = micOn, camera = cameraOn, computer = Environment.MachineName }).Wait();
+      Settings.PostUrl.PostJsonAsync(new { mic = micOn, camera = cameraOn }).Wait();
     }
 
     private static void OnRegChanged(object sender, RegChangedEventArgs e)

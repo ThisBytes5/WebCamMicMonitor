@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
       this.LogListBox = new System.Windows.Forms.ListBox();
       this.label1 = new System.Windows.Forms.Label();
       this.startMinimizedCB = new System.Windows.Forms.CheckBox();
@@ -132,6 +133,7 @@
       this.Controls.Add(this.startMinimizedCB);
       this.Controls.Add(this.label1);
       this.Controls.Add(this.LogListBox);
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "SettingsForm";
       this.Text = "Settings";
       this.Load += new System.EventHandler(this.SettingsForm_Load);
