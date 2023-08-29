@@ -1,4 +1,4 @@
-﻿namespace RegistryMonitorDemo
+﻿namespace WebCamMicMonitor
 {
   partial class SettingsForm
   {
@@ -41,8 +41,8 @@
       // 
       // LogListBox
       // 
-      this.LogListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+      this.LogListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
       this.LogListBox.FormattingEnabled = true;
       this.LogListBox.Location = new System.Drawing.Point(12, 139);
@@ -90,7 +90,7 @@
       // 
       // postURLTxt
       // 
-      this.postURLTxt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.postURLTxt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
       this.postURLTxt.Location = new System.Drawing.Point(71, 35);
       this.postURLTxt.Name = "postURLTxt";

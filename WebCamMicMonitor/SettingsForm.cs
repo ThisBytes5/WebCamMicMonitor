@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-using static RegistryMonitorDemo.LogManager;
+using static WebCamMicMonitor.LogManager;
 
-namespace RegistryMonitorDemo
+namespace WebCamMicMonitor
 {
   public partial class SettingsForm : Form
   {

@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace RegistryMonitorDemo
+namespace WebCamMicMonitor
 {
   public static class Settings
   {

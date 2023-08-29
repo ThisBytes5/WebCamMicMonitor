@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RegistryMonitorDemo
+namespace WebCamMicMonitor
 {
   public static class MonitoringManager
   {
@@ -86,7 +86,7 @@ namespace RegistryMonitorDemo
           }
         }
       }
-    
+
       LogManager.Log($"Camera = {cameraOn}");
       LogManager.Log($"Mic = {micOn}");
 
