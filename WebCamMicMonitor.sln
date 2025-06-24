@@ -2,15 +2,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistryUtils", "..\RegistryMonitor\RegistryUtils.csproj", "{EA74FE0C-2CE0-41E8-9A36-0773F9313660}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCamMicMonitor", "WebCamMicMonitor.csproj", "{AEE3982F-56E2-4B72-A9A8-E0CA64D1ABFC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D4CC7ECB-3B04-4D16-9FC8-429E305DE9F9}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistryUtils", "RegistryMonitor\RegistryUtils.csproj", "{EA74FE0C-2CE0-41E8-9A36-0773F9313660}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCamMicMonitor", "WebCamMicMonitor\WebCamMicMonitor.csproj", "{AEE3982F-56E2-4B72-A9A8-E0CA64D1ABFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
