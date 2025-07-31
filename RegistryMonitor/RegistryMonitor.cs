@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
@@ -62,6 +63,7 @@ namespace RegistryUtils
     private const int KEY_QUERY_VALUE = 0x0001;
     private const int KEY_NOTIFY = 0x0010;
     private const int STANDARD_RIGHTS_READ = 0x00020000;
+    private const int ERROR_SUCCESS = 0;
 
     private static readonly IntPtr HKEY_CLASSES_ROOT = new IntPtr(unchecked((int)0x80000000));
     private static readonly IntPtr HKEY_CURRENT_USER = new IntPtr(unchecked((int)0x80000001));
@@ -70,6 +72,16 @@ namespace RegistryUtils
     private static readonly IntPtr HKEY_PERFORMANCE_DATA = new IntPtr(unchecked((int)0x80000004));
     private static readonly IntPtr HKEY_CURRENT_CONFIG = new IntPtr(unchecked((int)0x80000005));
     private static readonly IntPtr HKEY_DYN_DATA = new IntPtr(unchecked((int)0x80000006));
+
+    // Registry hive name constants
+    private const string HKCR_FULL = "HKEY_CLASSES_ROOT";
+    private const string HKCR_SHORT = "HKCR";
+    private const string HKCU_FULL = "HKEY_CURRENT_USER";
+    private const string HKCU_SHORT = "HKCU";
+    private const string HKLM_FULL = "HKEY_LOCAL_MACHINE";
+    private const string HKLM_SHORT = "HKLM";
+    private const string HKU_FULL = "HKEY_USERS";
+    private const string HKCC_FULL = "HKEY_CURRENT_CONFIG";
 
     #endregion
 
@@ -139,6 +151,22 @@ namespace RegistryUtils
 
     #endregion
 
+    #region Registry hive lookup
+
+    private static readonly Dictionary<string, IntPtr> RegistryHiveLookup = new Dictionary<string, IntPtr>(StringComparer.OrdinalIgnoreCase)
+    {
+      { HKCR_FULL, HKEY_CLASSES_ROOT },
+      { HKCR_SHORT, HKEY_CLASSES_ROOT },
+      { HKCU_FULL, HKEY_CURRENT_USER },
+      { HKCU_SHORT, HKEY_CURRENT_USER },
+      { HKLM_FULL, HKEY_LOCAL_MACHINE },
+      { HKLM_SHORT, HKEY_LOCAL_MACHINE },
+      { HKU_FULL, HKEY_USERS },
+      { HKCC_FULL, HKEY_CURRENT_CONFIG }
+    };
+
+    #endregion
+
     #region Private member variables
 
     private IntPtr _registryHive;
@@ -157,10 +185,12 @@ namespace RegistryUtils
     /// Initializes a new instance of the <see cref="RegistryMonitor"/> class.
     /// </summary>
     /// <param name="name">The name.</param>
+    /// <param name="id">The ID that is passed to client in on change event.</param>
     public RegistryMonitor(string name, string id)
     {
-      if (name == null || name.Length == 0)
-        throw new ArgumentNullException("name");
+      if (string.IsNullOrWhiteSpace(name))
+        throw new ArgumentException("Registry key name cannot be null or empty", nameof(name));
+      
       ID = id;
       RegistryKey = name;
       InitRegistryKey(name);
@@ -171,9 +201,13 @@ namespace RegistryUtils
     /// </summary>
     public void Dispose()
     {
-      Stop();
-      _disposed = true;
-      GC.SuppressFinalize(this);
+      if (!_disposed)
+      {
+        Stop();
+        _eventTerminate?.Dispose();
+        _disposed = true;
+        GC.SuppressFinalize(this);
+      }
     }
 
     /// <summary>
@@ -199,38 +233,15 @@ namespace RegistryUtils
     private void InitRegistryKey(string name)
     {
       string[] nameParts = name.Split('\\');
+      string hiveName = nameParts[0];
 
-      switch (nameParts[0])
+      if (!RegistryHiveLookup.TryGetValue(hiveName, out _registryHive))
       {
-        case "HKEY_CLASSES_ROOT":
-        case "HKCR":
-          _registryHive = HKEY_CLASSES_ROOT;
-          break;
-
-        case "HKEY_CURRENT_USER":
-        case "HKCU":
-          _registryHive = HKEY_CURRENT_USER;
-          break;
-
-        case "HKEY_LOCAL_MACHINE":
-        case "HKLM":
-          _registryHive = HKEY_LOCAL_MACHINE;
-          break;
-
-        case "HKEY_USERS":
-          _registryHive = HKEY_USERS;
-          break;
-
-        case "HKEY_CURRENT_CONFIG":
-          _registryHive = HKEY_CURRENT_CONFIG;
-          break;
-
-        default:
-          _registryHive = IntPtr.Zero;
-          throw new ArgumentException("The registry hive '" + nameParts[0] + "' is not supported", "value");
+        _registryHive = IntPtr.Zero;
+        throw new ArgumentException($"The registry hive '{hiveName}' is not supported", nameof(name));
       }
 
-      _registrySubName = String.Join("\\", nameParts, 1, nameParts.Length - 1);
+      _registrySubName = nameParts.Length > 1 ? string.Join("\\", nameParts, 1, nameParts.Length - 1) : string.Empty;
     }
 
     #endregion
@@ -298,20 +309,23 @@ namespace RegistryUtils
 
     private void ThreadLoop()
     {
-      IntPtr registryKey;
-      int result = RegOpenKeyEx(_registryHive, _registrySubName, 0, STANDARD_RIGHTS_READ | KEY_QUERY_VALUE | KEY_NOTIFY,
-                                out registryKey);
-      if (result != 0)
-        throw new Win32Exception(result);
-
+      IntPtr registryKey = IntPtr.Zero;
+      AutoResetEvent eventNotify = null;
+      
       try
       {
-        AutoResetEvent _eventNotify = new AutoResetEvent(false);
-        WaitHandle[] waitHandles = new WaitHandle[] { _eventNotify, _eventTerminate };
+        int result = RegOpenKeyEx(_registryHive, _registrySubName, 0, STANDARD_RIGHTS_READ | KEY_QUERY_VALUE | KEY_NOTIFY,
+                                  out registryKey);
+        if (result != ERROR_SUCCESS)
+          throw new Win32Exception(result);
+
+        eventNotify = new AutoResetEvent(false);
+        WaitHandle[] waitHandles = { eventNotify, _eventTerminate };
+        
         while (!_eventTerminate.WaitOne(0, true))
         {
-          result = RegNotifyChangeKeyValue(registryKey, true, _regFilter, _eventNotify.Handle, true);
-          if (result != 0)
+          result = RegNotifyChangeKeyValue(registryKey, true, _regFilter, eventNotify.Handle, true);
+          if (result != ERROR_SUCCESS)
             throw new Win32Exception(result);
 
           if (WaitHandle.WaitAny(waitHandles) == 0)
@@ -322,6 +336,7 @@ namespace RegistryUtils
       }
       finally
       {
+        eventNotify?.Dispose();
         if (registryKey != IntPtr.Zero)
         {
           RegCloseKey(registryKey);
