@@ -102,6 +102,8 @@ namespace WebCamMicMonitor
     {
       LogManager.Log("ERROR: " + e.GetException().Message);
       MonitoringManager.StopMonitoring();
+      LogManager.Log("Restarting monitoring after error...");
+      MonitoringManager.StartMonitoring();
     }
   }
 }
